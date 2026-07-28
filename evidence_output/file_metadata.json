@@ -1,0 +1,506 @@
+[
+  {
+    "filename": "Screenshot_20250601_102648.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250601_102648.png",
+    "size_bytes": 1667937,
+    "created": "2025-06-01T10:26:48+05:30",
+    "modified": "2025-06-01T10:26:48+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "6622f9b079401e0e170a8343958ad138"
+  },
+  {
+    "filename": "Screenshot_20250602_102533.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250602_102533.png",
+    "size_bytes": 592268,
+    "created": "2025-06-02T10:25:33+05:30",
+    "modified": "2025-06-02T10:25:33+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "71805db03cede9f78510b503edbf4977"
+  },
+  {
+    "filename": "IMG_20250603_095724_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250603_095724_000.jpg",
+    "size_bytes": 4810714,
+    "created": "2025-06-03T09:57:24+05:30",
+    "modified": "2025-06-03T09:57:34+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "e012b93793083478c7207f86d8a42a8c"
+  },
+  {
+    "filename": "IMG_20250603_105823_002.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250603_105823_002.heic",
+    "size_bytes": 2788968,
+    "created": "2025-06-03T10:58:23+05:30",
+    "modified": "2025-06-03T10:58:27+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "37160e115c86c750dc4d9e7570302bd9"
+  },
+  {
+    "filename": "IMG_20250603_175703_001.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250603_175703_001.heic",
+    "size_bytes": 2729235,
+    "created": "2025-06-03T17:57:03+05:30",
+    "modified": "2025-06-03T17:57:11+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "4ac0d5084ce687e4006da3dd3267505c"
+  },
+  {
+    "filename": "Screenshot_20250603_202318.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250603_202318.png",
+    "size_bytes": 704932,
+    "created": "2025-06-03T20:23:18+05:30",
+    "modified": "2025-06-03T20:23:18+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "e626e82e2038ff0a85148da34cbebcc7"
+  },
+  {
+    "filename": "IMG_20250604_080718_001.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250604_080718_001.jpg",
+    "size_bytes": 2026661,
+    "created": "2025-06-04T08:07:18+05:30",
+    "modified": "2025-06-04T08:07:25+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "a086b358496abbedf826161dad7f9604"
+  },
+  {
+    "filename": "IMG_20250604_120725_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250604_120725_000.heic",
+    "size_bytes": 4163751,
+    "created": "2025-06-04T12:07:25+05:30",
+    "modified": "2025-06-04T12:07:27+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "70bed94780b638a847e806c80005105d"
+  },
+  {
+    "filename": "IMG_20250605_082719_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250605_082719_000.heic",
+    "size_bytes": 3827107,
+    "created": "2025-06-05T08:27:19+05:30",
+    "modified": "2025-06-05T08:27:26+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "7c303336b3683ae1a9398644e3daeaec"
+  },
+  {
+    "filename": "IMG_20250605_203256_001.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250605_203256_001.jpg",
+    "size_bytes": 7158125,
+    "created": "2025-06-05T20:32:56+05:30",
+    "modified": "2025-06-05T20:32:57+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "0ae16c779f43188f3355ac9db4ebd692"
+  },
+  {
+    "filename": "IMG_20250606_133109_002.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250606_133109_002.heic",
+    "size_bytes": 4112981,
+    "created": "2025-06-06T13:31:09+05:30",
+    "modified": "2025-06-06T13:31:16+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "b1484e14f7a0f9137e016473e33596b6"
+  },
+  {
+    "filename": "IMG_20250606_172143_001.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250606_172143_001.jpg",
+    "size_bytes": 3701483,
+    "created": "2025-06-06T17:21:43+05:30",
+    "modified": "2025-06-06T17:21:48+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "34d918034b75728cbc9630ec99429f59"
+  },
+  {
+    "filename": "IMG_20250606_194229_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250606_194229_000.heic",
+    "size_bytes": 3856659,
+    "created": "2025-06-06T19:42:29+05:30",
+    "modified": "2025-06-06T19:42:38+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "6250a7948e1ecd3e6ace43a68d250e9f"
+  },
+  {
+    "filename": "IMG_20250607_124223_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250607_124223_000.heic",
+    "size_bytes": 3289741,
+    "created": "2025-06-07T12:42:23+05:30",
+    "modified": "2025-06-07T12:42:26+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "cb040d4e6a20145286d479118212e5e4"
+  },
+  {
+    "filename": "spotify_offline_cache.ogg",
+    "path": "/sdcard/Android/data/com.spotify.music/files/spotify_offline_cache.ogg",
+    "size_bytes": 9701226,
+    "created": "2025-06-07T16:31:48+05:30",
+    "modified": "2025-06-07T16:31:48+05:30",
+    "mime_type": "audio/ogg",
+    "md5_hash": "cb41dfae6eef78a06c204b843e4e9e5c"
+  },
+  {
+    "filename": "voice_note_002.m4a",
+    "path": "/sdcard/WhatsApp/Media/WhatsApp Audio/voice_note_002.m4a",
+    "size_bytes": 128668,
+    "created": "2025-06-07T22:00:10+05:30",
+    "modified": "2025-06-07T22:00:10+05:30",
+    "mime_type": "audio/mp4",
+    "md5_hash": "3d88a99204ac15c0750e112919905bca"
+  },
+  {
+    "filename": "Screenshot_20250608_142732.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250608_142732.png",
+    "size_bytes": 1175059,
+    "created": "2025-06-08T14:27:32+05:30",
+    "modified": "2025-06-08T14:27:32+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "d4bfa3cf608005109e3eeab5265273c1"
+  },
+  {
+    "filename": "IMG_20250609_094646_002.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250609_094646_002.heic",
+    "size_bytes": 1595938,
+    "created": "2025-06-09T09:46:46+05:30",
+    "modified": "2025-06-09T09:46:52+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "16aeab2364acc48adf5e76a275056942"
+  },
+  {
+    "filename": "salary_slip_may.pdf",
+    "path": "/sdcard/Download/salary_slip_may.pdf",
+    "size_bytes": 117508,
+    "created": "2025-06-09T19:57:35+05:30",
+    "modified": "2025-06-09T19:57:35+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "1116ee4bdf43e41c8531e4643e29a896"
+  },
+  {
+    "filename": "IMG_20250609_212943_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250609_212943_000.heic",
+    "size_bytes": 4550401,
+    "created": "2025-06-09T21:29:43+05:30",
+    "modified": "2025-06-09T21:29:49+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "70c437ee5dacf2b9e59b04e977964c9e"
+  },
+  {
+    "filename": "IMG_20250609_224849_001.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250609_224849_001.heic",
+    "size_bytes": 4771054,
+    "created": "2025-06-09T22:48:49+05:30",
+    "modified": "2025-06-09T22:48:56+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "ec628bb9856a6dae5118607ba31c80e8"
+  },
+  {
+    "filename": "podcast_episode_42.mp3",
+    "path": "/sdcard/Download/podcast_episode_42.mp3",
+    "size_bytes": 9064310,
+    "created": "2025-06-10T20:21:05+05:30",
+    "modified": "2025-06-10T20:21:05+05:30",
+    "mime_type": "audio/mpeg",
+    "md5_hash": "83a24b4cfa9fdab34482d66d12c670cc"
+  },
+  {
+    "filename": "IMG_20250611_141616_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250611_141616_000.jpg",
+    "size_bytes": 4567798,
+    "created": "2025-06-11T14:16:16+05:30",
+    "modified": "2025-06-11T14:16:16+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "4207945f037c137350a93944b68a9948"
+  },
+  {
+    "filename": "budget_tracker.xlsx",
+    "path": "/sdcard/Download/budget_tracker.xlsx",
+    "size_bytes": 149143,
+    "created": "2025-06-11T15:49:25+05:30",
+    "modified": "2025-06-11T15:49:25+05:30",
+    "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "md5_hash": "a98728e18bb7a82e63f49b720a4be5d0"
+  },
+  {
+    "filename": "voice_note_001.m4a",
+    "path": "/sdcard/WhatsApp/Media/WhatsApp Audio/voice_note_001.m4a",
+    "size_bytes": 331180,
+    "created": "2025-06-11T18:00:34+05:30",
+    "modified": "2025-06-11T18:00:34+05:30",
+    "mime_type": "audio/mp4",
+    "md5_hash": "58d272d2d4a5a5afc657d113c3c4ad19"
+  },
+  {
+    "filename": "IMG_20250612_084335_001.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250612_084335_001.jpg",
+    "size_bytes": 1637483,
+    "created": "2025-06-12T08:43:35+05:30",
+    "modified": "2025-06-12T08:43:41+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "6c92f6b777af1a7a4dc5c155133c8c1b"
+  },
+  {
+    "filename": "IMG_20250612_094343_002.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250612_094343_002.heic",
+    "size_bytes": 2136195,
+    "created": "2025-06-12T09:43:43+05:30",
+    "modified": "2025-06-12T09:43:48+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "2855e432cdf38205df890182108e18f7"
+  },
+  {
+    "filename": "IMG_20250612_094458_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250612_094458_000.jpg",
+    "size_bytes": 6473917,
+    "created": "2025-06-12T09:44:58+05:30",
+    "modified": "2025-06-12T09:45:00+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "7df400ea61534f287fe407f99c88eb9e"
+  },
+  {
+    "filename": "apartment_agreement.pdf",
+    "path": "/sdcard/Download/apartment_agreement.pdf",
+    "size_bytes": 1211987,
+    "created": "2025-06-12T22:00:56+05:30",
+    "modified": "2025-06-12T22:00:56+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "a5e1feefc645434d4a68866ea6fc53b6"
+  },
+  {
+    "filename": "meeting_notes.pdf",
+    "path": "/sdcard/Download/meeting_notes.pdf",
+    "size_bytes": 45472,
+    "created": "2025-06-12T22:25:59+05:30",
+    "modified": "2025-06-12T22:25:59+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "0cd018fcb6e4602d36eb656ea0c02a36"
+  },
+  {
+    "filename": "IMG_20250613_123131_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250613_123131_000.jpg",
+    "size_bytes": 6108102,
+    "created": "2025-06-13T12:31:31+05:30",
+    "modified": "2025-06-13T12:31:35+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "109cb65b90287f996050cea1f3b4fe69"
+  },
+  {
+    "filename": "invoice_june_2025.pdf",
+    "path": "/sdcard/Download/invoice_june_2025.pdf",
+    "size_bytes": 151282,
+    "created": "2025-06-13T21:09:09+05:30",
+    "modified": "2025-06-13T21:09:09+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "2d2c67678d163f801e2312ff04a35d4e"
+  },
+  {
+    "filename": "IMG_20250614_145247_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250614_145247_000.heic",
+    "size_bytes": 2824973,
+    "created": "2025-06-14T14:52:47+05:30",
+    "modified": "2025-06-14T14:52:49+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "d9d453ce386db3494bb40426be9b3db9"
+  },
+  {
+    "filename": "IMG_20250615_085547_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250615_085547_000.heic",
+    "size_bytes": 1280624,
+    "created": "2025-06-15T08:55:47+05:30",
+    "modified": "2025-06-15T08:55:52+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "5705a6dd9f9b88cdb5d9d66fa0a344f3"
+  },
+  {
+    "filename": "IMG_20250615_180353_001.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250615_180353_001.heic",
+    "size_bytes": 2213503,
+    "created": "2025-06-15T18:03:53+05:30",
+    "modified": "2025-06-15T18:03:55+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "75eae19d0942772bba9753112bf5d23f"
+  },
+  {
+    "filename": "project_roadmap_q3.pdf",
+    "path": "/sdcard/Download/project_roadmap_q3.pdf",
+    "size_bytes": 334181,
+    "created": "2025-06-16T11:29:20+05:30",
+    "modified": "2025-06-16T11:29:20+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "35b5b36e5e44588574a0ac04fe1d0a89"
+  },
+  {
+    "filename": "IMG_20250616_143445_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250616_143445_000.jpg",
+    "size_bytes": 5614669,
+    "created": "2025-06-16T14:34:45+05:30",
+    "modified": "2025-06-16T14:34:45+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "49e42e65b4d876f038f3f5f5a5f12892"
+  },
+  {
+    "filename": "IMG_20250616_175423_003.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250616_175423_003.jpg",
+    "size_bytes": 2585721,
+    "created": "2025-06-16T17:54:23+05:30",
+    "modified": "2025-06-16T17:54:31+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "03cb38feb8f7592d3d19f4c446d7916c"
+  },
+  {
+    "filename": "IMG_20250616_182946_001.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250616_182946_001.heic",
+    "size_bytes": 1665226,
+    "created": "2025-06-16T18:29:46+05:30",
+    "modified": "2025-06-16T18:29:51+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "f0282e0e5e968b07376d32048090abdb"
+  },
+  {
+    "filename": "IMG_20250616_192710_002.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250616_192710_002.heic",
+    "size_bytes": 3594093,
+    "created": "2025-06-16T19:27:10+05:30",
+    "modified": "2025-06-16T19:27:16+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "63f8953b15ef7e7393771fa3f9255519"
+  },
+  {
+    "filename": "IMG_20250617_071920_001.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250617_071920_001.jpg",
+    "size_bytes": 5250363,
+    "created": "2025-06-17T07:19:20+05:30",
+    "modified": "2025-06-17T07:19:25+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "a664670a8fb323d586dde62568603128"
+  },
+  {
+    "filename": "whatsapp_video_note.mp4",
+    "path": "/sdcard/WhatsApp/Media/WhatsApp Video/whatsapp_video_note.mp4",
+    "size_bytes": 5164549,
+    "created": "2025-06-17T12:08:31+05:30",
+    "modified": "2025-06-17T12:08:31+05:30",
+    "mime_type": "video/mp4",
+    "md5_hash": "c0aa56c2fe0efb8ae4ac52622b495b7b"
+  },
+  {
+    "filename": "IMG_20250617_134339_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250617_134339_000.jpg",
+    "size_bytes": 6242312,
+    "created": "2025-06-17T13:43:39+05:30",
+    "modified": "2025-06-17T13:43:46+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "0889a53c33e8aafa72e079799a2bfdba"
+  },
+  {
+    "filename": "restaurant_menu.pdf",
+    "path": "/sdcard/Download/restaurant_menu.pdf",
+    "size_bytes": 1644028,
+    "created": "2025-06-18T09:39:36+05:30",
+    "modified": "2025-06-18T09:39:36+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "4af0f8273c6857600af5bc293a9c1d3e"
+  },
+  {
+    "filename": "Screenshot_20250618_154007.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250618_154007.png",
+    "size_bytes": 1850052,
+    "created": "2025-06-18T15:40:07+05:30",
+    "modified": "2025-06-18T15:40:07+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "a27dbeb82ac0f0f56cb00a66a9d3faa1"
+  },
+  {
+    "filename": "IMG_20250618_193147_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250618_193147_000.heic",
+    "size_bytes": 1979111,
+    "created": "2025-06-18T19:31:47+05:30",
+    "modified": "2025-06-18T19:31:52+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "c256c67da36625dd5b146a44526afd71"
+  },
+  {
+    "filename": "Screenshot_20250619_091851.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250619_091851.png",
+    "size_bytes": 874932,
+    "created": "2025-06-19T09:18:51+05:30",
+    "modified": "2025-06-19T09:18:51+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "0e78960019f5c18795608b9eb0426e00"
+  },
+  {
+    "filename": "IMG_20250619_173028_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250619_173028_000.heic",
+    "size_bytes": 4329514,
+    "created": "2025-06-19T17:30:28+05:30",
+    "modified": "2025-06-19T17:30:33+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "a5b8ca33fdebd0aedf564f2d1f39f0a0"
+  },
+  {
+    "filename": "IMG_20250620_072111_002.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250620_072111_002.heic",
+    "size_bytes": 2314746,
+    "created": "2025-06-20T07:21:11+05:30",
+    "modified": "2025-06-20T07:21:19+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "debf0865b8739ae610a755d3d8cd12f1"
+  },
+  {
+    "filename": "Screenshot_20250620_094202.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250620_094202.png",
+    "size_bytes": 1507798,
+    "created": "2025-06-20T09:42:02+05:30",
+    "modified": "2025-06-20T09:42:02+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "ec8629126557ea142a90d2b2b541fcb3"
+  },
+  {
+    "filename": "Screenshot_20250620_135935.png",
+    "path": "/sdcard/Pictures/Screenshots/Screenshot_20250620_135935.png",
+    "size_bytes": 1773267,
+    "created": "2025-06-20T13:59:35+05:30",
+    "modified": "2025-06-20T13:59:35+05:30",
+    "mime_type": "image/png",
+    "md5_hash": "230beeb408827c53c2e8a7f2d46eb1df"
+  },
+  {
+    "filename": "VID_trip_highlights.mp4",
+    "path": "/sdcard/DCIM/Camera/VID_trip_highlights.mp4",
+    "size_bytes": 26154770,
+    "created": "2025-06-20T18:00:54+05:30",
+    "modified": "2025-06-20T18:00:54+05:30",
+    "mime_type": "video/mp4",
+    "md5_hash": "5fc37a381d12972a93aaf1b63996b922"
+  },
+  {
+    "filename": "IMG_20250620_195326_000.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250620_195326_000.jpg",
+    "size_bytes": 6473058,
+    "created": "2025-06-20T19:53:26+05:30",
+    "modified": "2025-06-20T19:53:35+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "9cc51810511b94ae798e89f425278b8a"
+  },
+  {
+    "filename": "IMG_20250620_214821_001.jpg",
+    "path": "/sdcard/DCIM/Camera/IMG_20250620_214821_001.jpg",
+    "size_bytes": 3589594,
+    "created": "2025-06-20T21:48:21+05:30",
+    "modified": "2025-06-20T21:48:28+05:30",
+    "mime_type": "image/jpeg",
+    "md5_hash": "f61656a0e72465cf46c8a45da41d2b16"
+  },
+  {
+    "filename": "ticket_blr_del_june.pdf",
+    "path": "/sdcard/Download/ticket_blr_del_june.pdf",
+    "size_bytes": 145777,
+    "created": "2025-06-21T07:03:20+05:30",
+    "modified": "2025-06-21T07:03:20+05:30",
+    "mime_type": "application/pdf",
+    "md5_hash": "692f4d64c5482d20bdd186643db78d18"
+  },
+  {
+    "filename": "IMG_20250621_152522_000.heic",
+    "path": "/sdcard/DCIM/Camera/IMG_20250621_152522_000.heic",
+    "size_bytes": 3527486,
+    "created": "2025-06-21T15:25:22+05:30",
+    "modified": "2025-06-21T15:25:26+05:30",
+    "mime_type": "image/heif",
+    "md5_hash": "591acef3e2bb57dbd8905dfba033c9d8"
+  }
+]

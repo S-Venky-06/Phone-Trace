@@ -1,0 +1,39 @@
+# PhoneTrace -- Git Ignore Pattern File
+
+# User Settings & Configurations
+settings.json
+cases.json
+
+# Local evidence output & db files
+evidence_output/
+*.db
+
+# Temporary report previews & exports
+investigation_report.html
+timeline_export.json
+timeline_export.csv
+
+# Python environment & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Logging
+*.log
+
+# Editor-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini

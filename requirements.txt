@@ -1,0 +1,17 @@
+# PhoneTrace — Requirements
+#
+# Phases 1-3 use only the Python Standard Library.
+# Phase 4 (GUI) requires PyQt6.
+#
+# Minimum Python version: 3.12
+#
+# Standard library modules used:
+#   sqlite3, json, random, pathlib, os, datetime, logging, hashlib, math, time, sys
+#
+# External dependencies (Phase 4+):
+PyQt6>=6.5
+
+# AI Provider dependencies (Phase 5+):
+# (Optional: Only required if using online LLM providers)
+google-generativeai>=0.3.0
+openai>=1.0.0
