@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from artifacts import ParserManager
 from timeline import (
@@ -25,6 +25,7 @@ from timeline import (
     TimelineFilter,
     TimelineStatistics,
 )
+from anomaly_detection import AnomalyEngine, Anomaly
 
 logger = logging.getLogger("gui.backend")
 
@@ -56,6 +57,7 @@ class BackendService:
         self._events: List[ForensicEvent] = []
         self._sessions: List[InvestigationSession] = []
         self._correlations: List[CorrelationGroup] = []
+        self._anomalies: List[Anomaly] = []
         self._statistics: Optional[StatisticsReport] = None
         self._ai_assistant = None
         self._loaded: bool = False
@@ -82,18 +84,26 @@ class BackendService:
         correlator = EvidenceCorrelator(self._config)
         self._correlations = correlator.correlate(self._events)
 
+        logger.info("Backend: running anomaly detection engine...")
+        anomaly_engine = AnomalyEngine()
+        self._anomalies = anomaly_engine.analyze(self._events)
+
         logger.info("Backend: computing statistics...")
         self._statistics = TimelineStatistics.generate(
             self._events, self._sessions, self._correlations,
         )
 
         self._loaded = True
-        logger.info("Backend: ready (%d events).", len(self._events))
+        logger.info("Backend: ready (%d events, %d anomalies).", len(self._events), len(self._anomalies))
 
         if self._ai_assistant is not None:
             self._ai_assistant.set_data(
                 self._events, self._sessions, self._correlations, self._statistics
             )
+
+    @property
+    def anomalies(self) -> List[Anomaly]:
+        return list(self._anomalies)
 
     @property
     def is_loaded(self) -> bool:

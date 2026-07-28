@@ -13,8 +13,8 @@ from PyQt6.QtWidgets import (
 )
 
 from gui.theme import (
-    ACCENT, ARTIFACT_COLORS, BG_CARD, BG_ELEVATED, BG_SECONDARY,
-    BORDER, DANGER, SUCCESS, TEXT, TEXT_DIM, WARNING,
+    ACCENT, ARTIFACT_COLORS, BG_CARD, BG_SECONDARY, BORDER,
+    SUCCESS, TEXT, TEXT_DIM, WARNING,
 )
 from gui.widgets.stat_card import StatCard
 

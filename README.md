@@ -15,6 +15,7 @@ PhoneTrace reconstructs a smartphone timeline and verifies whether a suspect's c
 | **Phase 3** | Timeline reconstruction & correlation | ✅ Complete |
 | **Phase 4** | Digital Forensics Investigation Dashboard (PyQt6) | ✅ Complete |
 | **Phase 5** | AI Investigation Assistant & Reports | ✅ Complete |
+| **Phase 6** | Forensic Workstation UI Redesign, GPS Mapping & Anomaly Engine | ✅ Complete |
 
 ---
 

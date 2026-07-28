@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
 )
 
 from gui.services.case_manager import CaseManager
-from gui.theme import TEXT_DIM, BORDER, BG_CARD, TEXT, SELECTION, BG_SECONDARY, BG_ELEVATED, BG_PRIMARY
+from gui.theme import BORDER, BG_CARD, TEXT, SELECTION, BG_SECONDARY, BG_ELEVATED, BG_PRIMARY
 
 
 class _NewCaseDialog(QDialog):

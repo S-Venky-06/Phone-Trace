@@ -17,10 +17,13 @@ from gui.theme import (
     ARTIFACT_COLORS, AI_ACCENT,
 )
 from gui.widgets.stat_card import StatCard
+from gui.widgets.charts import (
+    ActivityHeatmapWidget, ArtifactPieChartWidget, DailyEventBarChartWidget,
+)
 
 
 class StatisticsPage(QWidget):
-    """Statistics dashboard with metric cards and top contacts."""
+    """Statistics dashboard with metric cards, interactive charts, and top contacts."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -83,6 +86,27 @@ class StatisticsPage(QWidget):
             grid.addWidget(card, i // 4, i % 4)
         self._layout.addLayout(grid)
 
+        # Charts Section
+        charts_header = QLabel("Visual Analytics")
+        charts_header.setStyleSheet(
+            f"font-size: 15px; font-weight: 600; color: {TEXT}; margin-top: 8px; background: transparent;"
+        )
+        self._layout.addWidget(charts_header)
+
+        charts_row = QHBoxLayout()
+        charts_row.setSpacing(14)
+
+        self._heatmap_chart = ActivityHeatmapWidget()
+        charts_row.addWidget(self._heatmap_chart, 1)
+
+        self._pie_chart = ArtifactPieChartWidget()
+        charts_row.addWidget(self._pie_chart, 1)
+
+        self._layout.addLayout(charts_row)
+
+        self._bar_chart = DailyEventBarChartWidget()
+        self._layout.addWidget(self._bar_chart)
+
         # Top contacts section
         contacts_header = QLabel("Top Contacts (Calls + SMS)")
         contacts_header.setStyleSheet(
@@ -144,6 +168,12 @@ class StatisticsPage(QWidget):
         # Update non-animating cards directly
         self._c_hour.set_value(f"{s.busiest_hour:02d}:00")
         self._c_hour.set_subtitle(f"{s.busiest_hour_count} events total")
+
+        # Update visual analytics charts
+        if hasattr(backend, "events") and backend.events:
+            self._heatmap_chart.set_data(backend.events)
+            self._pie_chart.set_data(ct)
+            self._bar_chart.set_data(backend.events)
 
         if s.busiest_day:
             self._c_day.set_value(s.busiest_day.strftime("%b %d, %Y"))

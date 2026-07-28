@@ -6,7 +6,7 @@ Right-side inspector panel with collapsible sections for
 event metadata, location, and related events.
 """
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel,
@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 
 from gui.theme import (
     ACCENT, AI_ACCENT, ARTIFACT_COLORS, BG_CARD, BG_ELEVATED,
-    BG_SECONDARY, BORDER, TEXT, TEXT_DIM,
+    BG_SECONDARY, BORDER, TEXT, TEXT_DIM, WARNING,
 )
 
 
@@ -84,6 +84,8 @@ class _CollapsibleSection(QFrame):
 class DetailsPanel(QFrame):
     """Right-side panel showing selected event details with collapsible sections."""
 
+    bookmark_requested = pyqtSignal(object)  # Emits ForensicEvent to bookmark
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedWidth(300)
@@ -140,7 +142,10 @@ class DetailsPanel(QFrame):
             self._show_placeholder()
             return
 
-        # Artifact type badge
+        # Artifact type badge & bookmark button
+        header_row = QHBoxLayout()
+        header_row.setSpacing(6)
+
         atype = event.artifact_type
         color = ARTIFACT_COLORS.get(atype, "#64748B")
         badge = QLabel(f"  {atype.upper()}  ")
@@ -150,7 +155,30 @@ class DetailsPanel(QFrame):
             f"border-radius: 4px; font-size: 11px; font-weight: 600; "
             f"padding: 2px 8px; letter-spacing: 0.5px;"
         )
-        self._layout.addWidget(badge)
+        header_row.addWidget(badge)
+        header_row.addStretch()
+
+        btn_bm = QPushButton("★ Bookmark")
+        btn_bm.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_bm.setFixedHeight(24)
+        btn_bm.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {BG_CARD};
+                color: {WARNING};
+                border: 1px solid {BORDER};
+                border-radius: 4px;
+                padding: 2px 8px;
+                font-size: 11px;
+                font-weight: 600;
+            }}
+            QPushButton:hover {{
+                background-color: {BG_ELEVATED};
+            }}
+        """)
+        btn_bm.clicked.connect(lambda: self.bookmark_requested.emit(event))
+        header_row.addWidget(btn_bm)
+
+        self._layout.addLayout(header_row)
 
         # Evidence section
         evidence_sec = _CollapsibleSection("Evidence")

@@ -8,11 +8,11 @@ Enhanced with custom artifact category badges and clean layouts.
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
-    QHBoxLayout, QHeaderView, QLabel, QTreeWidget, QTreeWidgetItem,
+    QHeaderView, QLabel, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget,
 )
 
-from gui.theme import ARTIFACT_COLORS, TEXT_DIM, TEXT, BORDER
+from gui.theme import ARTIFACT_COLORS, BORDER
 
 
 class EvidencePage(QWidget):

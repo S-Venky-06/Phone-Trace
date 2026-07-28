@@ -10,16 +10,18 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Optional
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
-    QHBoxLayout, QMainWindow, QMessageBox, QSplitter, QStackedWidget,
-    QStatusBar, QToolBar, QVBoxLayout, QWidget, QLineEdit, QDialog,
+    QDialog, QHBoxLayout, QMainWindow, QMessageBox, QSplitter,
+    QStackedWidget, QStatusBar, QToolBar, QWidget,
 )
 
 from gui.services.backend import BackendService
 from gui.services.case_manager import CaseInfo, CaseManager
+from gui.services.bookmark_manager import BookmarkManager
 from gui.services.settings_manager import SettingsManager
 from gui.widgets.case_selection_dialog import CaseSelectionDialog
 from gui.widgets.details_panel import DetailsPanel
@@ -30,7 +32,9 @@ from gui.pages.cases import CasesPage
 from gui.pages.evidence import EvidencePage
 from gui.pages.timeline_page import TimelinePage
 from gui.pages.correlation import CorrelationPage
+from gui.pages.map_view import MapView
 from gui.pages.statistics_page import StatisticsPage
+from gui.pages.bookmarks_page import BookmarksPage
 from gui.pages.graph_view import GraphView
 from gui.pages.ai_assistant_page import AIAssistantPage
 from gui.pages.reports import ReportsPage
@@ -48,6 +52,7 @@ class MainWindow(QMainWindow):
         project_root = Path(__file__).resolve().parent.parent
         self._settings = SettingsManager(project_root)
         self._case_mgr = CaseManager(project_root)
+        self._bookmark_mgr = BookmarkManager(project_root)
         self._backend = BackendService()
 
         self.setWindowTitle("PhoneTrace — Digital Forensic Workstation")
@@ -219,8 +224,10 @@ class MainWindow(QMainWindow):
         self._cases_page = CasesPage(self._case_mgr)
         self._timeline_page = TimelinePage()
         self._correlation_page = CorrelationPage()
+        self._map_page = MapView()
         self._evidence_page = EvidencePage()
         self._statistics_page = StatisticsPage()
+        self._bookmarks_page = BookmarksPage(self._bookmark_mgr)
         self._graph_page = GraphView()
         self._ai_assistant_page = AIAssistantPage()
         self._reports_page = ReportsPage()
@@ -232,8 +239,10 @@ class MainWindow(QMainWindow):
             ("cases", self._cases_page),
             ("timeline", self._timeline_page),
             ("correlations", self._correlation_page),
+            ("map", self._map_page),
             ("evidence", self._evidence_page),
             ("statistics", self._statistics_page),
+            ("bookmarks", self._bookmarks_page),
             ("graph", self._graph_page),
             ("ai_assistant", self._ai_assistant_page),
             ("reports", self._reports_page),
@@ -268,15 +277,31 @@ class MainWindow(QMainWindow):
     def _connect_signals(self) -> None:
         self._sidebar.page_changed.connect(self._on_sidebar_navigate)
         self._cases_page.case_opened.connect(self._on_case_opened)
+        self._details.bookmark_requested.connect(self._on_bookmark_requested)
 
         # Pages that emit event_selected
         for page in (
             self._timeline_page, self._correlation_page,
             self._evidence_page, self._graph_page,
-            self._ai_assistant_page,
+            self._ai_assistant_page, self._bookmarks_page,
         ):
             if hasattr(page, "event_selected"):
                 page.event_selected.connect(self._details.show_event)
+
+    def _on_bookmark_requested(self, event) -> None:
+        if not event:
+            return
+        eid = getattr(event, "event_id", str(id(event)))
+        ts_str = event.timestamp.strftime("%Y-%m-%d %H:%M:%S") if hasattr(event, "timestamp") and event.timestamp else ""
+        self._bookmark_mgr.add_bookmark(
+            event_id=eid,
+            title=getattr(event, "title", "Event"),
+            artifact_type=getattr(event, "artifact_type", "event"),
+            timestamp_str=ts_str,
+            tag="Suspicious",
+        )
+        self._bookmarks_page.refresh()
+        self.statusBar().showMessage(f"★ Bookmarked event: {getattr(event, 'title', 'Event')}")
 
     # ------------------------------------------------------------------
     # Actions
@@ -338,6 +363,7 @@ class MainWindow(QMainWindow):
         self._dashboard_page.update_from_backend(self._backend)
         self._timeline_page.load_from_backend(self._backend)
         self._correlation_page.load_from_backend(self._backend)
+        self._map_page.load_from_backend(self._backend)
         self._evidence_page.load_from_backend(self._backend)
         self._statistics_page.update_from_backend(self._backend)
         self._graph_page.load_from_backend(self._backend)

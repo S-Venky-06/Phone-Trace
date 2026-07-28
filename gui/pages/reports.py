@@ -8,14 +8,16 @@ Enhanced with workstation-style buttons and layout.
 
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtGui import QTextDocument
+from PyQt6.QtPrintSupport import QPrinter
 from PyQt6.QtWidgets import (
     QFileDialog, QHBoxLayout, QLabel, QMessageBox, QPushButton,
     QTextBrowser, QVBoxLayout, QWidget,
 )
 
 from gui.theme import (
-    ACCENT, AI_ACCENT, BG_SECONDARY, BG_CARD, BORDER, SUCCESS, TEXT, TEXT_DIM, DANGER,
+    AI_ACCENT, BG_SECONDARY, BORDER, SUCCESS, TEXT, TEXT_DIM, DANGER,
 )
 
 
@@ -54,7 +56,7 @@ class ReportsPage(QWidget):
         header.setObjectName("heading")
         layout.addWidget(header)
 
-        sub = QLabel("Export forensic timeline data or generate AI investigation reports.")
+        sub = QLabel("Export forensic timeline data or generate AI investigation reports in JSON, CSV, HTML, or PDF formats.")
         sub.setObjectName("subheading")
         layout.addWidget(sub)
 
@@ -80,17 +82,23 @@ class ReportsPage(QWidget):
         ai_row = QHBoxLayout()
         ai_row.setSpacing(10)
 
-        self._btn_gen_report = QPushButton("📊  Generate AI Investigation Report")
+        self._btn_gen_report = QPushButton("📊  Generate AI Report")
         self._btn_gen_report.setObjectName("aiBtn")
         self._btn_gen_report.setMinimumHeight(40)
         self._btn_gen_report.clicked.connect(self._generate_report)
         ai_row.addWidget(self._btn_gen_report)
 
-        self._btn_export_html = QPushButton("📥  Export Report HTML")
+        self._btn_export_html = QPushButton("🌐  Export HTML")
         self._btn_export_html.setMinimumHeight(40)
         self._btn_export_html.setEnabled(False)
         self._btn_export_html.clicked.connect(self._export_html)
         ai_row.addWidget(self._btn_export_html)
+
+        self._btn_export_pdf = QPushButton("📄  Export PDF")
+        self._btn_export_pdf.setMinimumHeight(40)
+        self._btn_export_pdf.setEnabled(False)
+        self._btn_export_pdf.clicked.connect(self._export_pdf)
+        ai_row.addWidget(self._btn_export_pdf)
 
         layout.addLayout(ai_row)
 
@@ -186,6 +194,7 @@ class ReportsPage(QWidget):
         self._preview.setHtml(html)
         self._btn_gen_report.setEnabled(True)
         self._btn_export_html.setEnabled(True)
+        self._btn_export_pdf.setEnabled(True)
         self._status.setText("✓ Report generated successfully.")
         self._status.setStyleSheet(f"color: {SUCCESS};")
 
@@ -210,3 +219,27 @@ class ReportsPage(QWidget):
                 self._status.setStyleSheet(f"color: {SUCCESS};")
             except Exception as exc:
                 QMessageBox.critical(self, "Export Error", str(exc))
+
+    def _export_pdf(self) -> None:
+        if not self._last_html:
+            QMessageBox.warning(self, "No Report", "Generate a report first.")
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export Report PDF", "investigation_report.pdf",
+            "PDF Files (*.pdf)",
+        )
+        if path:
+            try:
+                doc = QTextDocument()
+                doc.setHtml(self._last_html)
+                printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+                printer.setOutputFormat(QPrinter.OutputFormat.PdfFormat)
+                printer.setOutputFileName(path)
+                doc.print_(printer)
+
+                self._status.setText(f"✓ Report exported to PDF: {path}")
+                self._status.setStyleSheet(f"color: {SUCCESS};")
+            except Exception as exc:
+                QMessageBox.critical(self, "Export Error", f"Failed to export PDF: {exc}")
+
