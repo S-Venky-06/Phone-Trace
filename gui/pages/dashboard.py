@@ -150,6 +150,19 @@ class DashboardPage(QWidget):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.addWidget(scroll)
 
+    def set_case_info(self, case) -> None:
+        """Update and display active case details in the banner."""
+        if not case:
+            self._case_banner.setVisible(False)
+            return
+
+        self._case_info.setText(
+            f"<b>Active Case:</b> {case.name} ({case.case_id}) &nbsp;&nbsp;|&nbsp;&nbsp; "
+            f"<b>Investigator:</b> {case.investigator} &nbsp;&nbsp;|&nbsp;&nbsp; "
+            f"<b>Status:</b> <span style='color: {SUCCESS};'>{case.status}</span>"
+        )
+        self._case_banner.setVisible(True)
+
     def update_from_backend(self, backend) -> None:
         """Refresh all cards and recent activity from the backend."""
         if not backend or not backend.is_loaded:

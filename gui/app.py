@@ -18,8 +18,10 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QDialog
 from gui.main_window import MainWindow
+from gui.services.case_manager import CaseManager
+from gui.widgets.case_selection_dialog import CaseSelectionDialog
 from gui.theme import DARK_STYLESHEET
 
 
@@ -41,7 +43,17 @@ def main() -> None:
     # Apply dark theme
     app.setStyleSheet(DARK_STYLESHEET)
 
-    window = MainWindow()
+    # Initialize CaseManager to prompt user for case selection first
+    case_mgr = CaseManager(_PROJECT_ROOT)
+    dlg = CaseSelectionDialog(case_mgr)
+    if dlg.exec() != QDialog.DialogCode.Accepted or not dlg.selected_case:
+        logger.info("No case selected. Exiting PhoneTrace.")
+        sys.exit(0)
+
+    selected_case = dlg.selected_case
+    logger.info("Opened case: %s (%s)", selected_case.name, selected_case.case_id)
+
+    window = MainWindow(active_case=selected_case)
     window.show()
 
     logger.info("PhoneTrace ready.")

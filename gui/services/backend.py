@@ -64,8 +64,10 @@ class BackendService:
     # Loading
     # ------------------------------------------------------------------
 
-    def load(self) -> None:
+    def load(self, evidence_dir: str | Path | None = None) -> None:
         """Parse evidence, build timeline, correlate, and compute stats."""
+        if evidence_dir is not None:
+            self._evidence_dir = evidence_dir
         logger.info("Backend: loading evidence...")
 
         self._pm = ParserManager(self._evidence_dir)

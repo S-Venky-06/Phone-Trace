@@ -15,12 +15,13 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
     QHBoxLayout, QMainWindow, QMessageBox, QSplitter, QStackedWidget,
-    QStatusBar, QToolBar, QVBoxLayout, QWidget, QLineEdit,
+    QStatusBar, QToolBar, QVBoxLayout, QWidget, QLineEdit, QDialog,
 )
 
 from gui.services.backend import BackendService
-from gui.services.case_manager import CaseManager
+from gui.services.case_manager import CaseInfo, CaseManager
 from gui.services.settings_manager import SettingsManager
+from gui.widgets.case_selection_dialog import CaseSelectionDialog
 from gui.widgets.details_panel import DetailsPanel
 from gui.widgets.sidebar import Sidebar
 
@@ -41,7 +42,7 @@ logger = logging.getLogger("gui.MainWindow")
 class MainWindow(QMainWindow):
     """PhoneTrace main application window."""
 
-    def __init__(self) -> None:
+    def __init__(self, active_case: Optional[CaseInfo] = None) -> None:
         super().__init__()
 
         project_root = Path(__file__).resolve().parent.parent
@@ -59,6 +60,14 @@ class MainWindow(QMainWindow):
         self._build_central_widget()
         self._build_status_bar()
         self._connect_signals()
+
+        # If an active case was passed, initialize and load evidence
+        if active_case:
+            self._on_case_opened(active_case)
+        elif self._case_mgr.active_case:
+            self._on_case_opened(self._case_mgr.active_case)
+        else:
+            self._navigate("dashboard")
 
         logger.info("MainWindow initialized.")
 
@@ -136,9 +145,9 @@ class MainWindow(QMainWindow):
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
-        # Cases Page
+        # Cases Page action opens Case Selection Dialog
         self._act_cases = QAction("📁  Cases", self)
-        self._act_cases.triggered.connect(lambda: self._navigate("cases"))
+        self._act_cases.triggered.connect(self._open_case_selector)
         toolbar.addAction(self._act_cases)
 
         # Load Evidence
@@ -257,7 +266,8 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def _connect_signals(self) -> None:
-        self._sidebar.page_changed.connect(self._navigate)
+        self._sidebar.page_changed.connect(self._on_sidebar_navigate)
+        self._cases_page.case_opened.connect(self._on_case_opened)
 
         # Pages that emit event_selected
         for page in (
@@ -272,6 +282,19 @@ class MainWindow(QMainWindow):
     # Actions
     # ------------------------------------------------------------------
 
+    def _on_sidebar_navigate(self, key: str) -> None:
+        """Handle sidebar item click."""
+        if key == "cases":
+            self._open_case_selector()
+        else:
+            self._navigate(key)
+
+    def _open_case_selector(self) -> None:
+        """Pop up the standalone Case Selection Dialog."""
+        dlg = CaseSelectionDialog(self._case_mgr, parent=self)
+        if dlg.exec() == QDialog.DialogCode.Accepted and dlg.selected_case:
+            self._on_case_opened(dlg.selected_case)
+
     def _navigate(self, key: str) -> None:
         """Switch the visible page."""
         idx = self._pages.get(key)
@@ -280,13 +303,28 @@ class MainWindow(QMainWindow):
             self._sidebar.set_active(key)
             logger.info("Navigated to: %s", key)
 
-    def _load_evidence(self) -> None:
+    def _on_case_opened(self, case_info) -> None:
+        """Handle opening a case from CasesPage."""
+        if not case_info:
+            return
+        
+        self._dashboard_page.set_case_info(case_info)
+        evidence_dir = getattr(case_info, "evidence_dir", "")
+        self._load_evidence(evidence_dir=evidence_dir)
+        self._navigate("dashboard")
+
+    def _load_evidence(self, evidence_dir: str = "") -> None:
         """Parse evidence, build timeline, and refresh all pages."""
         self.statusBar().showMessage("Loading evidence...")
         self._act_load.setEnabled(False)
 
+        # Update case info on dashboard if active case exists
+        active_case = self._case_mgr.active_case
+        if active_case:
+            self._dashboard_page.set_case_info(active_case)
+
         try:
-            self._backend.load()
+            self._backend.load(evidence_dir=evidence_dir if evidence_dir else None)
         except Exception as exc:
             QMessageBox.critical(
                 self, "Load Error",
