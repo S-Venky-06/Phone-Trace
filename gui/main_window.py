@@ -70,6 +70,16 @@ class CustomTitleBar(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 0, 0)
         
+        # Icon
+        self.icon_label = QLabel("📱")
+        self.icon_label.setStyleSheet("background: transparent; font-size: 16px;")
+        layout.addWidget(self.icon_label)
+        
+        # Title
+        self.title_label = QLabel(" PhoneTrace")
+        self.title_label.setStyleSheet("background: transparent; color: #E6EDF3; font-weight: 600; padding-right: 15px; font-size: 13px;")
+        layout.addWidget(self.title_label)
+        
         # We will embed the menu bar into the title bar in the main window
         self.menu_layout = QHBoxLayout()
         self.menu_layout.setContentsMargins(0, 0, 0, 0)
@@ -77,24 +87,24 @@ class CustomTitleBar(QWidget):
         
         layout.addStretch()
         
-        btn_min = QPushButton("🗕")
+        btn_min = QPushButton("_")
         btn_min.setFixedSize(30, 30)
         btn_min.clicked.connect(self.parent_window.showMinimized)
         
-        btn_max = QPushButton("🗖")
+        btn_max = QPushButton("O")
         btn_max.setFixedSize(30, 30)
         btn_max.clicked.connect(self._toggle_max)
         
-        btn_close = QPushButton("🗙")
+        btn_close = QPushButton("X")
         btn_close.setFixedSize(30, 30)
         btn_close.clicked.connect(self.parent_window.close)
         
         for btn in (btn_min, btn_max, btn_close):
-            btn.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 14px; }"
+            btn.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 15px; font-weight: bold; font-family: Arial; }"
                               "QPushButton:hover { background: #22272E; color: #E6EDF3; }")
             layout.addWidget(btn)
             
-        btn_close.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 14px; }"
+        btn_close.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 15px; font-weight: bold; font-family: Arial; }"
                                 "QPushButton:hover { background: #E81123; color: white; }")
         
         self.dragPos = QPoint()
@@ -164,7 +174,9 @@ class MainWindow(QMainWindow):
         self._title_bar = CustomTitleBar(self)
         self.setMenuWidget(self._title_bar)
 
-        menu = self.menuBar()
+        from PyQt6.QtWidgets import QMenuBar
+        menu = QMenuBar(self._title_bar)
+        menu.setStyleSheet("QMenuBar { background: transparent; color: #7D8590; } QMenuBar::item:selected { background: #22272E; color: #E6EDF3; border-radius: 4px; }")
         self._title_bar.menu_layout.addWidget(menu)
 
         # File menu
