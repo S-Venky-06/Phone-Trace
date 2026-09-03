@@ -1,0 +1,2 @@
+[console_scripts]
+phonetrace = gui.app:main

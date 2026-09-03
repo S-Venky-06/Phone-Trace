@@ -1,3 +1,16 @@
+Metadata-Version: 2.4
+Name: phone-trace
+Version: 3.0.0
+Summary: AI-Assisted Android Digital Forensic Investigation Workstation
+Author: PhoneTrace Project
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: PyQt6>=6.5.0
+Requires-Dist: PyQt6-WebEngine>=6.5.0
+Requires-Dist: google-generativeai>=0.3.0
+Requires-Dist: openai>=1.0.0
+Requires-Dist: folium>=0.16.0
+
 # PhoneTrace
 
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)

@@ -1,141 +1,47 @@
 """
-PhoneTrace -- Interactive Tactical GPS Map Page
-=================================================
+PhoneTrace -- Interactive Tactical GPS Map Page (WebEngine + Folium)
+====================================================================
 
-Tactical forensic map with interactive zoom/pan controls, coordinate & timestamp HUD
-tooltips, geofence warning zones, path animation playback, and Inspector integration.
+Tactical forensic map utilizing Folium and Leaflet.js to plot suspect movement,
+alibi location, and incident location on a real interactive map.
 """
 
 from __future__ import annotations
 
+import io
 import logging
-from datetime import datetime
+from typing import Optional
+
+import folium
+from folium import plugins
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QBrush, QColor, QFont, QPen, QPainter, QPainterPath, QRadialGradient, QWheelEvent
 from PyQt6.QtWidgets import (
-    QComboBox, QFrame, QGraphicsEllipseItem,
-    QGraphicsScene, QGraphicsView, QHBoxLayout,
-    QLabel, QPushButton, QSlider, QVBoxLayout, QWidget,
+    QComboBox, QFrame, QHBoxLayout, QLabel,
+    QPushButton, QSlider, QVBoxLayout, QWidget
 )
+
+# Only import QWebEngineView here to avoid missing dependency errors in older phases
+try:
+    from PyQt6.QtWebEngineWidgets import QWebEngineView
+except ImportError:
+    QWebEngineView = None
 
 from case_config import ALIBI_LOCATION, INCIDENT_LOCATION, INCIDENT_START, INCIDENT_END
 from gui.theme import (
-    ACCENT, BG_CARD, BG_ELEVATED, BG_PRIMARY,
-    BG_SECONDARY, BORDER, DANGER, SUCCESS, TEXT, TEXT_DIM,
+    ACCENT, BG_CARD, BG_SECONDARY, BORDER, DANGER, SUCCESS, TEXT, TEXT_DIM
 )
 
 logger = logging.getLogger("gui.MapView")
 
 
-class _TacticalGraphicsView(QGraphicsView):
-    """Custom QGraphicsView with mouse-wheel zoom and drag panning."""
-
-    def __init__(self, scene: QGraphicsScene, parent=None):
-        super().__init__(scene, parent)
-        self._zoom_factor = 1.15
-        self._current_zoom = 1.0
-
-        self.setRenderHint(QPainter.RenderHint.Antialiasing)
-        self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
-        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
-        self.setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setStyleSheet(f"background: {BG_PRIMARY}; border: none;")
-
-    def wheelEvent(self, event: QWheelEvent) -> None:
-        """Zoom in or out using mouse wheel."""
-        if event.angleDelta().y() > 0:
-            if self._current_zoom < 10.0:
-                self.scale(self._zoom_factor, self._zoom_factor)
-                self._current_zoom *= self._zoom_factor
-        else:
-            if self._current_zoom > 0.2:
-                self.scale(1.0 / self._zoom_factor, 1.0 / self._zoom_factor)
-                self._current_zoom /= self._zoom_factor
-
-    def reset_zoom(self) -> None:
-        """Reset view zoom and center scene."""
-        self.resetTransform()
-        self._current_zoom = 1.0
-        self.fitInView(self.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
-
-    def zoom_in(self) -> None:
-        if self._current_zoom < 10.0:
-            self.scale(self._zoom_factor, self._zoom_factor)
-            self._current_zoom *= self._zoom_factor
-
-    def zoom_out(self) -> None:
-        if self._current_zoom > 0.2:
-            self.scale(1.0 / self._zoom_factor, 1.0 / self._zoom_factor)
-            self._current_zoom /= self._zoom_factor
-
-
-class _GPSNodeItem(QGraphicsEllipseItem):
-    """Clickable, hoverable node representing a GPS ping with HUD tooltips."""
-
-    def __init__(self, event, x: float, y: float, on_select_cb=None, radius: float = 6):
-        super().__init__(-radius, -radius, radius * 2, radius * 2)
-        self.event = event
-        self.setPos(x, y)
-        self._cb = on_select_cb
-        self._selected = False
-
-        self.setAcceptHoverEvents(True)
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        # Color based on incident window
-        is_incident = False
-        if event.timestamp and INCIDENT_START <= event.timestamp <= INCIDENT_END:
-            is_incident = True
-
-        self._color = QColor(DANGER) if is_incident else QColor(ACCENT)
-
-        grad = QRadialGradient(0, 0, radius)
-        grad.setColorAt(0.0, QColor(255, 255, 255, 240))
-        grad.setColorAt(0.4, self._color)
-        grad.setColorAt(1.0, QColor(self._color.red(), self._color.green(), self._color.blue(), 30))
-
-        self.setBrush(QBrush(grad))
-        self.setPen(QPen(self._color, 1.2))
-
-        # Format HUD Tooltip
-        lat = event.location.latitude if event.location else 0.0
-        lon = event.location.longitude if event.location else 0.0
-        acc = f"± {event.location.accuracy}m" if event.location and event.location.accuracy else "N/A"
-        ts_str = event.timestamp.strftime("%Y-%m-%d  %H:%M:%S IST") if event.timestamp else "N/A"
-        inc_tag = " <span style='color:#EF4444; font-weight:bold;'>(INCIDENT WINDOW)</span>" if is_incident else ""
-
-        self.setToolTip(
-            f"<b>📍 GPS Location Ping</b>{inc_tag}<br/>"
-            f"<b>Timestamp:</b> {ts_str}<br/>"
-            f"<b>Coordinates:</b> {lat:.5f}° N, {lon:.5f}° E<br/>"
-            f"<b>Accuracy:</b> {acc}<br/>"
-            f"<b>Source:</b> {event.source}"
-        )
-
-    def mousePressEvent(self, event) -> None:
-        super().mousePressEvent(event)
-        if self._cb:
-            self._cb(self.event)
-
-    def set_active(self, active: bool) -> None:
-        self._selected = active
-        if active:
-            self.setPen(QPen(QColor("#FFFFFF"), 2.5))
-        else:
-            self.setPen(QPen(self._color, 1.2))
-
-
 class MapView(QWidget):
-    """Tactical GPS map plotting suspect movement, alibi, incident zones, and playback."""
+    """Tactical GPS map plotting suspect movement and zones using Folium."""
 
     event_selected = pyqtSignal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._events: list = []
-        self._nodes: list[_GPSNodeItem] = []
         self._current_index = 0
 
         # Animation timer
@@ -148,11 +54,11 @@ class MapView(QWidget):
         layout.setSpacing(14)
 
         # Header
-        header = QLabel("GPS Map Visualization")
+        header = QLabel("Interactive GPS Map Visualization")
         header.setObjectName("heading")
         layout.addWidget(header)
 
-        sub = QLabel("Tactical geospatial analysis plotting suspect movement, alibi location, and incident location.")
+        sub = QLabel("Tactical geospatial analysis plotting suspect movement using real map data (Folium/Leaflet).")
         sub.setObjectName("subheading")
         layout.addWidget(sub)
 
@@ -169,47 +75,46 @@ class MapView(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
 
-        # Canvas Scene & View
-        self._scene = QGraphicsScene()
-        self._view = _TacticalGraphicsView(self._scene, parent=self)
-        container_layout.addWidget(self._view, stretch=1)
+        if QWebEngineView is None:
+            lbl = QLabel("PyQt6-WebEngine is required for the interactive map.")
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            container_layout.addWidget(lbl)
+            self._web_view = None
+        else:
+            self._web_view = QWebEngineView()
+            container_layout.addWidget(self._web_view, stretch=1)
+            # Init empty map
+            empty_map = folium.Map(location=[12.9716, 77.5946], zoom_start=11, tiles="OpenStreetMap")
+            empty_map.get_root().header.add_child(folium.Element("""
+            <style>
+                .leaflet-tile-pane { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+            </style>
+            """))
+            data = io.BytesIO()
+            empty_map.save(data, close_file=False)
+            
+            self._current_map_script = ""
+            self._web_view.loadFinished.connect(self._on_map_loaded)
+            self._web_view.setHtml(data.getvalue().decode())
 
-        # Floating Toolbar Overlay
+        # Floating Toolbar Overlay (now simpler since WebEngine has built-in zoom/pan)
         toolbar = QHBoxLayout()
         toolbar.setContentsMargins(12, 12, 12, 12)
         toolbar.setSpacing(8)
 
-        btn_fit = QPushButton("⛶ Fit View")
-        btn_fit.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_fit.setStyleSheet(self._btn_style())
-        btn_fit.clicked.connect(self._view.reset_zoom)
-        toolbar.addWidget(btn_fit)
-
-        btn_in = QPushButton("＋ Zoom In")
-        btn_in.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_in.setStyleSheet(self._btn_style())
-        btn_in.clicked.connect(self._view.zoom_in)
-        toolbar.addWidget(btn_in)
-
-        btn_out = QPushButton("－ Zoom Out")
-        btn_out.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_out.setStyleSheet(self._btn_style())
-        btn_out.clicked.connect(self._view.zoom_out)
-        toolbar.addWidget(btn_out)
-
         toolbar.addStretch()
 
-        btn_inc = QPushButton("⚡ Incident Window")
+        btn_inc = QPushButton("⚡ Focus Active Ping")
         btn_inc.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_inc.setStyleSheet(self._btn_style(DANGER))
         btn_inc.clicked.connect(self._focus_incident)
         toolbar.addWidget(btn_inc)
 
-        # Add toolbar on top layout row
-        top_bar_widget = QWidget(map_container)
+        # Add toolbar overlay if we want it, but for web view it might block interactions
+        # We will just place it above the web view in the container layout for simplicity
+        top_bar_widget = QWidget()
         top_bar_widget.setLayout(toolbar)
-        top_bar_widget.setStyleSheet("background: transparent;")
-        container_layout.addWidget(top_bar_widget)
+        container_layout.insertWidget(0, top_bar_widget)
 
         layout.addWidget(map_container, stretch=1)
 
@@ -260,10 +165,9 @@ class MapView(QWidget):
         pb_layout.addWidget(self._slider, stretch=1)
 
         self._speed_combo = QComboBox()
-        self._speed_combo.addItems(["0.5x Speed", "1x Speed (Normal)", "2x Speed", "5x Speed"])
-        self._speed_combo.setCurrentIndex(1)  # Default to 1x Speed (Normal)
+        self._speed_combo.addItems(["0.5x Speed", "1x Speed", "2x Speed", "5x Speed"])
+        self._speed_combo.setCurrentIndex(1)
         self._speed_combo.setFixedHeight(34)
-        self._speed_combo.currentIndexChanged.connect(self._on_speed_changed)
         pb_layout.addWidget(self._speed_combo)
 
         layout.addWidget(playback_frame)
@@ -285,20 +189,18 @@ class MapView(QWidget):
                 font-weight: 600;
             }}
             QPushButton:hover {{
-                background-color: {BG_ELEVATED};
+                background-color: #2D333B;
                 border-color: {color};
             }}
         """
 
     def load_from_backend(self, backend) -> None:
-        """Plot GPS events and geofences onto map."""
-        if not backend or not backend.is_loaded:
+        """Plot GPS events and geofences onto the Folium map."""
+        if not backend or not backend.is_loaded or self._web_view is None:
             return
 
         gps_events = [e for e in backend.events if e.artifact_type == "gps" and e.location]
         self._events = gps_events
-        self._nodes.clear()
-        self._scene.clear()
 
         if not gps_events:
             self._status_lbl.setText("No GPS events found in evidence.")
@@ -308,132 +210,202 @@ class MapView(QWidget):
         self._slider.setRange(0, len(gps_events) - 1)
         self._slider.setValue(0)
 
-        lats = [e.location.latitude for e in gps_events] + [ALIBI_LOCATION['latitude'], INCIDENT_LOCATION['latitude']]
-        lons = [e.location.longitude for e in gps_events] + [ALIBI_LOCATION['longitude'], INCIDENT_LOCATION['longitude']]
+        # Compute Center
+        lats = [e.location.latitude for e in gps_events]
+        lons = [e.location.longitude for e in gps_events]
+        center_lat = sum(lats) / len(lats)
+        center_lon = sum(lons) / len(lons)
 
-        min_lat, max_lat = min(lats), max(lats)
-        min_lon, max_lon = min(lons), max(lons)
-
-        lat_range = max(max_lat - min_lat, 0.01)
-        lon_range = max(max_lon - min_lon, 0.01)
-
-        width = 1000
-        height = 600
-
-        def to_xy(lat: float, lon: float):
-            x = 60 + ((lon - min_lon) / lon_range) * (width - 120)
-            y = height - 60 - ((lat - min_lat) / lat_range) * (height - 120)
-            return x, y
-
-        # Draw Grid Overlay Lines
-        grid_pen = QPen(QColor(BORDER), 0.8, Qt.PenStyle.DashLine)
-        for gx in range(60, width, 100):
-            self._scene.addLine(gx, 40, gx, height - 40, grid_pen)
-        for gy in range(40, height, 80):
-            self._scene.addLine(40, gy, width - 40, gy, grid_pen)
-
-        # Draw Geofence Warning Zones
-        # Alibi Zone (Koramangala)
-        ax, ay = to_xy(ALIBI_LOCATION['latitude'], ALIBI_LOCATION['longitude'])
-        alibi_zone = self._scene.addEllipse(ax - 45, ay - 45, 90, 90, QPen(QColor(SUCCESS), 1.5, Qt.PenStyle.DashLine), QBrush(QColor(16, 185, 129, 25)))
-        alibi_zone.setToolTip(f"<b>🎯 Alibi Zone:</b> {ALIBI_LOCATION['name']}")
-
-        alibi_lbl = self._scene.addText(f"🎯 Alibi: {ALIBI_LOCATION['name']}")
-        alibi_lbl.setDefaultTextColor(QColor(SUCCESS))
-        alibi_lbl.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        alibi_lbl.setPos(ax + 12, ay - 14)
-
-        # Incident Zone (Electronic City)
-        ix, iy = to_xy(INCIDENT_LOCATION['latitude'], INCIDENT_LOCATION['longitude'])
-        inc_zone = self._scene.addEllipse(ix - 55, iy - 55, 110, 110, QPen(QColor(DANGER), 2, Qt.PenStyle.DashLine), QBrush(QColor(239, 68, 68, 30)))
-        inc_zone.setToolTip(f"<b>🚨 Incident Zone:</b> {INCIDENT_LOCATION['name']}")
-
-        inc_lbl = self._scene.addText(f"🚨 Incident: {INCIDENT_LOCATION['name']}")
-        inc_lbl.setDefaultTextColor(QColor(DANGER))
-        inc_lbl.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        inc_lbl.setPos(ix + 12, iy - 14)
-
-        # Draw Connecting Path Lines
-        last_x, last_y = None, None
-        for ev in gps_events:
-            x, y = to_xy(ev.location.latitude, ev.location.longitude)
-            if last_x is not None:
-                is_inc = INCIDENT_START <= ev.timestamp <= INCIDENT_END if ev.timestamp else False
-                line_color = QColor(DANGER) if is_inc else QColor(ACCENT)
-                pen_style = Qt.PenStyle.SolidLine if is_inc else Qt.PenStyle.SolidLine
-
-                line = self._scene.addLine(last_x, last_y, x, y, QPen(line_color, 1.8, pen_style))
-                line.setOpacity(0.65 if not is_inc else 0.9)
-            last_x, last_y = x, y
-
-            # GPS Node Item
-            node = _GPSNodeItem(ev, x, y, on_select_cb=self._on_node_selected)
-            self._scene.addItem(node)
-            self._nodes.append(node)
-
-        # Center view
-        self._view.reset_zoom()
-
-        # Create prominent animated suspect beacon (bright glowing target)
-        self._beacon_node = self._scene.addEllipse(-10, -10, 20, 20, QPen(QColor("#FFFFFF"), 2.5), QBrush(QColor(56, 189, 248)))
-        self._beacon_node.setZValue(100)
-        grad = QRadialGradient(0, 0, 10)
-        grad.setColorAt(0.0, QColor(255, 255, 255, 255))
-        grad.setColorAt(0.4, QColor(56, 189, 248, 240))
-        grad.setColorAt(1.0, QColor(56, 189, 248, 40))
-        self._beacon_node.setBrush(QBrush(grad))
-
-        # Active progressive path trail
-        self._trail_path = self._scene.addPath(
-            QPainterPath(), QPen(QColor(56, 189, 248), 3.5, Qt.PenStyle.SolidLine)
+        # Generate Folium Map using default OpenStreetMap (free, no API key)
+        m = folium.Map(
+            location=[center_lat, center_lon],
+            zoom_start=12,
+            tiles="OpenStreetMap"
         )
-        self._trail_path.setZValue(50)
-        self._trail_path.setOpacity(0.9)
+        
+        # Inject CSS to invert the OpenStreetMap tiles to match our dark theme
+        m.get_root().header.add_child(folium.Element("""
+        <style>
+            .leaflet-tile-pane {
+                filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+            }
+        </style>
+        """))
 
-        self._select_ping(0)
+        # Draw Zones
+        folium.Circle(
+            location=[ALIBI_LOCATION['latitude'], ALIBI_LOCATION['longitude']],
+            radius=1500,
+            color=SUCCESS,
+            fill=True,
+            fill_color=SUCCESS,
+            fill_opacity=0.2,
+            tooltip=f"Alibi: {ALIBI_LOCATION['name']}"
+        ).add_to(m)
 
-    def _on_node_selected(self, event) -> None:
-        """Handle clicking a node on the map canvas."""
-        self.event_selected.emit(event)
-        if event in self._events:
-            idx = self._events.index(event)
-            self._slider.setValue(idx)
+        folium.Circle(
+            location=[INCIDENT_LOCATION['latitude'], INCIDENT_LOCATION['longitude']],
+            radius=1500,
+            color=DANGER,
+            fill=True,
+            fill_color=DANGER,
+            fill_opacity=0.2,
+            tooltip=f"Incident: {INCIDENT_LOCATION['name']}"
+        ).add_to(m)
+
+        # 1) Extract path_coords
+        path_coords = []
+        for ev in gps_events:
+            path_coords.append((ev.location.latitude, ev.location.longitude))
+
+        # 2) Draw a dim static base path UNDER the dots
+        folium.PolyLine(
+            path_coords,
+            color='#334155', # Dim slate gray
+            weight=3,
+            opacity=0.6
+        ).add_to(m)        # Save to HTML string
+        data = io.BytesIO()
+        m.save(data, close_file=False)
+        html = data.getvalue().decode()
+
+        # Build JSON for JS dynamic path and dots
+        import json
+        path_data = []
+        for i, ev in enumerate(gps_events):
+            is_inc = bool(ev.timestamp and INCIDENT_START <= ev.timestamp <= INCIDENT_END)
+            ts_str = ev.timestamp.strftime("%Y-%m-%d %H:%M:%S") if ev.timestamp else "N/A"
+            path_data.append({
+                "lat": ev.location.latitude,
+                "lon": ev.location.longitude,
+                "isInc": is_inc,
+                "ts": ts_str
+            })
+        path_json = json.dumps(path_data)
+
+        script = f"""
+            var _mapInstance = null;
+            function _getMap() {{
+                if (_mapInstance) return _mapInstance;
+                for (var key in window) {{
+                    if (key.startsWith('map_') && window[key] && typeof window[key].flyTo === 'function') {{
+                        _mapInstance = window[key];
+                        return _mapInstance;
+                    }}
+                }}
+                return null;
+            }}
+            
+            window.allPings = {path_json};
+            window.activeMarker = null;
+            window.dynamicPath = null;
+            window.dotsGroup = null;
+            
+            window.initMapLayers = function() {{
+                var m = _getMap();
+                if (!m || typeof L === 'undefined') return;
+                
+                // Create glowing path first so it renders underneath dots
+                if (!window.dynamicPath) {{
+                    window.dynamicPath = L.polyline([], {{
+                        color: '{ACCENT}', 
+                        weight: 5, 
+                        opacity: 0.9,
+                        className: 'glowing-path'
+                    }}).addTo(m);
+                }}
+                
+                // Create dots layer group on top
+                if (!window.dotsGroup) {{
+                    var dots = window.allPings.map(function(p, i) {{
+                        var color = p.isInc ? '{DANGER}' : '#475569';
+                        return L.circleMarker([p.lat, p.lon], {{
+                            radius: 3, 
+                            color: color, 
+                            fillColor: color, 
+                            fillOpacity: 0.9,
+                            weight: 1
+                        }}).bindTooltip("Ping #" + i + ": " + p.ts + "<br>Lat: " + p.lat.toFixed(5) + ", Lon: " + p.lon.toFixed(5));
+                    }});
+                    window.dotsGroup = L.layerGroup(dots).addTo(m);
+                }}
+            }};
+            
+            window.updateActiveMarker = function(index, lat, lon) {{
+                var m = _getMap();
+                if (!m || typeof L === 'undefined') return;
+                
+                window.initMapLayers();
+                
+                var currentCoords = [];
+                for (var i = 0; i <= index && i < window.allPings.length; i++) {{
+                    currentCoords.push([window.allPings[i].lat, window.allPings[i].lon]);
+                }}
+                window.dynamicPath.setLatLngs(currentCoords);
+                
+                // Update the beacon marker
+                if (!window.activeMarker) {{
+                    var icon = L.divIcon({{
+                        className: 'custom-beacon',
+                        html: '<div style="background-color:{ACCENT}; width:16px; height:16px; border-radius:50%; border: 3px solid white; box-shadow: 0 0 15px {ACCENT};"></div>',
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    }});
+                    window.activeMarker = L.marker([lat, lon], {{icon: icon, zIndexOffset: 2000}}).addTo(m);
+                }} else {{
+                    window.activeMarker.setLatLng([lat, lon]);
+                }}
+            }};
+            
+            window.panToIncident = function(lat, lon) {{
+                var m = _getMap();
+                if (m) {{
+                    m.flyTo([lat, lon], 15);
+                }}
+            }};
+            
+            // Add a style tag for the glowing path if needed
+            if (!document.getElementById('custom-map-styles')) {{
+                var style = document.createElement('style');
+                style.id = 'custom-map-styles';
+                style.innerHTML = '.glowing-path {{ filter: drop-shadow(0 0 4px {ACCENT}); }}';
+                document.head.appendChild(style);
+            }}
+        """
+        self._current_map_script = script
+        self._web_view.setHtml(html)
+
+    def _on_map_loaded(self, ok: bool) -> None:
+        """Handle map load completion and inject JavaScript."""
+        if not ok:
+            return
+            
+        if hasattr(self, '_current_map_script') and self._current_map_script:
+            self._web_view.page().runJavaScript(self._current_map_script)
+            # Re-select the current ping so the beacon shows up immediately after map load
+            self._select_ping(self._current_index if hasattr(self, '_current_index') and self._current_index >= 0 else 0)
 
     def _select_ping(self, index: int) -> None:
-        """Select node at index, move glowing beacon, update trail, and status."""
+        """Update active status and move the beacon marker in JS."""
         if not self._events or index < 0 or index >= len(self._events):
             return
 
         self._current_index = index
-
-        # Highlight node
-        target_node = self._nodes[index]
-        x, y = target_node.x(), target_node.y()
-
-        # Update glowing beacon location
-        if hasattr(self, "_beacon_node") and self._beacon_node:
-            self._beacon_node.setPos(x, y)
-
-        # Update progressive active trail
-        if hasattr(self, "_trail_path") and self._trail_path:
-            path = QPainterPath()
-            if self._nodes:
-                path.moveTo(self._nodes[0].x(), self._nodes[0].y())
-                for i in range(1, index + 1):
-                    path.lineTo(self._nodes[i].x(), self._nodes[i].y())
-            self._trail_path.setPath(path)
-
         ev = self._events[index]
-        ts_str = ev.timestamp.strftime("%Y-%m-%d  %H:%M:%S IST") if ev.timestamp else "N/A"
         lat = ev.location.latitude if ev.location else 0.0
         lon = ev.location.longitude if ev.location else 0.0
 
+        if self._web_view:
+            self._web_view.page().runJavaScript(f"updateActiveMarker({index}, {lat}, {lon});")
+
+        ts_str = ev.timestamp.strftime("%Y-%m-%d  %H:%M:%S IST") if ev.timestamp else "N/A"
+        
         self._status_lbl.setText(
             f"<b>Ping #{index + 1} / {len(self._events)}:</b> &nbsp;&nbsp;"
             f"<b>Time:</b> <span style='color:{ACCENT};'>{ts_str}</span> &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"<b>Coordinates:</b> <span style='color:{TEXT};'>{lat:.5f}° N, {lon:.5f}° E</span> &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"<b>Source:</b> {ev.source}"
+            f"<b>Coordinates:</b> <span style='color:{TEXT};'>{lat:.5f}° N, {lon:.5f}° E</span>"
         )
+        self.event_selected.emit(ev)
 
     def _on_slider_moved(self, value: int) -> None:
         self._select_ping(value)
@@ -447,7 +419,11 @@ class MapView(QWidget):
         else:
             if self._current_index >= len(self._events) - 1:
                 self._current_index = 0
-            self._timer.start(50)
+            speed_idx = self._speed_combo.currentIndex()
+            intervals = [100, 50, 40, 20]
+            timer_ms = intervals[speed_idx] if speed_idx < len(intervals) else 50
+            
+            self._timer.start(timer_ms)
             self._btn_play.setText("⏸  Pause")
             self._btn_play.setStyleSheet(f"background-color: {DANGER}; color: #FFFFFF;")
 
@@ -455,13 +431,16 @@ class MapView(QWidget):
         if not self._events:
             return
 
-        total = len(self._events)
         speed_idx = self._speed_combo.currentIndex()
-        # Speed presets: 0.5x (div 400), 1x (div 200), 2x (div 100), 5x (div 40)
-        divisors = [400.0, 200.0, 100.0, 40.0]
-        div = divisors[speed_idx] if speed_idx < len(divisors) else 200.0
-        step = max(1, int(total / div))
+        
+        # 0.5x: step=1 (every 100ms)
+        # 1.0x: step=1 (every 50ms)
+        # 2.0x: step=2 (every 40ms)
+        # 5.0x: step=5 (every 20ms)
+        steps = [1, 1, 2, 5]
+        step = steps[speed_idx] if speed_idx < len(steps) else 1
 
+        total = len(self._events)
         if self._current_index < total - 1:
             next_idx = min(total - 1, self._current_index + step)
             self._slider.setValue(next_idx)
@@ -470,17 +449,11 @@ class MapView(QWidget):
             self._btn_play.setText("▶  Play Path")
             self._btn_play.setStyleSheet("")
 
-    def _on_speed_changed(self, idx: int) -> None:
-        pass  # Speed is computed dynamically in _step_animation
-
     def _focus_incident(self) -> None:
-        """Focus camera on the incident window pings."""
-        inc_nodes = [
-            n for n in self._nodes
-            if n.event.timestamp and INCIDENT_START <= n.event.timestamp <= INCIDENT_END
-        ]
-        if inc_nodes:
-            self._on_node_selected(inc_nodes[0].event)
-            ix = inc_nodes[0].x()
-            iy = inc_nodes[0].y()
-            self._view.centerOn(ix, iy)
+        """Focus camera on the current active ping via JS."""
+        if self._web_view and self._events:
+            ev = self._events[self._current_index]
+            lat = ev.location.latitude if ev.location else 0.0
+            lon = ev.location.longitude if ev.location else 0.0
+            self._web_view.page().runJavaScript(f"panToIncident({lat}, {lon});")
+

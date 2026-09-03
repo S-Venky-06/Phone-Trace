@@ -12,11 +12,11 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
+from PyQt6.QtGui import QAction, QKeySequence, QMouseEvent
 from PyQt6.QtWidgets import (
     QDialog, QHBoxLayout, QMainWindow, QMessageBox, QSplitter,
-    QStackedWidget, QStatusBar, QToolBar, QWidget,
+    QStackedWidget, QStatusBar, QToolBar, QWidget, QLabel, QPushButton, QVBoxLayout
 )
 
 from gui.services.backend import BackendService
@@ -42,6 +42,76 @@ from gui.pages.settings import SettingsPage
 
 logger = logging.getLogger("gui.MainWindow")
 
+class LoaderThread(QThread):
+    finished = pyqtSignal()
+    error = pyqtSignal(str)
+
+    def __init__(self, backend, evidence_dir, parent=None):
+        super().__init__(parent)
+        self._backend = backend
+        self._evidence_dir = evidence_dir
+
+    def run(self):
+        try:
+            self._backend.load(evidence_dir=self._evidence_dir if self._evidence_dir else None)
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))
+
+class CustomTitleBar(QWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent_window = parent
+        self.setFixedHeight(35)
+        self.setStyleSheet("background-color: #0F1117; border-bottom: 1px solid #2D333B;")
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(10, 0, 0, 0)
+        
+        # We will embed the menu bar into the title bar in the main window
+        self.menu_layout = QHBoxLayout()
+        self.menu_layout.setContentsMargins(0, 0, 0, 0)
+        layout.addLayout(self.menu_layout)
+        
+        layout.addStretch()
+        
+        btn_min = QPushButton("🗕")
+        btn_min.setFixedSize(30, 30)
+        btn_min.clicked.connect(self.parent_window.showMinimized)
+        
+        btn_max = QPushButton("🗖")
+        btn_max.setFixedSize(30, 30)
+        btn_max.clicked.connect(self._toggle_max)
+        
+        btn_close = QPushButton("🗙")
+        btn_close.setFixedSize(30, 30)
+        btn_close.clicked.connect(self.parent_window.close)
+        
+        for btn in (btn_min, btn_max, btn_close):
+            btn.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 14px; }"
+                              "QPushButton:hover { background: #22272E; color: #E6EDF3; }")
+            layout.addWidget(btn)
+            
+        btn_close.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 14px; }"
+                                "QPushButton:hover { background: #E81123; color: white; }")
+        
+        self.dragPos = QPoint()
+
+    def _toggle_max(self):
+        if self.parent_window.isMaximized():
+            self.parent_window.showNormal()
+        else:
+            self.parent_window.showMaximized()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragPos = event.globalPosition().toPoint()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            self.parent_window.move(self.parent_window.pos() + event.globalPosition().toPoint() - self.dragPos)
+            self.dragPos = event.globalPosition().toPoint()
+
 
 class MainWindow(QMainWindow):
     """PhoneTrace main application window."""
@@ -54,6 +124,9 @@ class MainWindow(QMainWindow):
         self._case_mgr = CaseManager(project_root)
         self._bookmark_mgr = BookmarkManager(project_root)
         self._backend = BackendService()
+
+        # Frameless Window Hint
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         self.setWindowTitle("PhoneTrace — Digital Forensic Workstation")
         w = self._settings.get("window_width", 1400)
@@ -81,7 +154,11 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def _build_menu_bar(self) -> None:
+        self._title_bar = CustomTitleBar(self)
+        self.setMenuWidget(self._title_bar)
+
         menu = self.menuBar()
+        self._title_bar.menu_layout.addWidget(menu)
 
         # File menu
         file_menu = menu.addMenu("&File")
@@ -339,8 +416,8 @@ class MainWindow(QMainWindow):
         self._navigate("dashboard")
 
     def _load_evidence(self, evidence_dir: str = "") -> None:
-        """Parse evidence, build timeline, and refresh all pages."""
-        self.statusBar().showMessage("Loading evidence...")
+        """Parse evidence, build timeline, and refresh all pages asynchronously."""
+        self.statusBar().showMessage("Loading evidence... This may take a moment.")
         self._act_load.setEnabled(False)
 
         # Update case info on dashboard if active case exists
@@ -348,17 +425,20 @@ class MainWindow(QMainWindow):
         if active_case:
             self._dashboard_page.set_case_info(active_case)
 
-        try:
-            self._backend.load(evidence_dir=evidence_dir if evidence_dir else None)
-        except Exception as exc:
-            QMessageBox.critical(
-                self, "Load Error",
-                f"Failed to load evidence:\n{exc}",
-            )
-            self.statusBar().showMessage("Error loading evidence.")
-            self._act_load.setEnabled(True)
-            return
+        self._loader_thread = LoaderThread(self._backend, evidence_dir, self)
+        self._loader_thread.finished.connect(self._on_load_finished)
+        self._loader_thread.error.connect(self._on_load_error)
+        self._loader_thread.start()
 
+    def _on_load_error(self, err_msg: str) -> None:
+        QMessageBox.critical(
+            self, "Load Error",
+            f"Failed to load evidence:\n{err_msg}",
+        )
+        self.statusBar().showMessage("Error loading evidence.")
+        self._act_load.setEnabled(True)
+
+    def _on_load_finished(self) -> None:
         # Refresh all pages
         self._dashboard_page.update_from_backend(self._backend)
         self._timeline_page.load_from_backend(self._backend)
