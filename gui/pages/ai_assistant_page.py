@@ -60,7 +60,11 @@ class _AIWorker(QThread):
     def run(self):
         try:
             result = self._func()
-            self.finished.emit(str(result), self._op)
+            if hasattr(result, "answer"):
+                text = str(result.answer)
+            else:
+                text = str(result)
+            self.finished.emit(text, self._op)
         except Exception as exc:
             self.error.emit(str(exc), self._op)
 
@@ -151,6 +155,12 @@ class AIAssistantPage(QWidget):
         )
         self._btn_report.clicked.connect(self._on_generate_report)
         btn_row.addWidget(self._btn_report)
+
+        self._btn_export_pdf = self._make_action_btn(
+            "💾 Export PDF", "Save the current conversation/report as a PDF document"
+        )
+        self._btn_export_pdf.clicked.connect(self._on_export_pdf)
+        btn_row.addWidget(self._btn_export_pdf)
 
         layout.addLayout(btn_row)
 
@@ -322,6 +332,39 @@ class AIAssistantPage(QWidget):
             "report",
         )
 
+    def _on_export_pdf(self) -> None:
+        if not self._response_area.toPlainText().strip():
+            QMessageBox.warning(self, "Nothing to Export", "There is no content to export.")
+            return
+
+        from PyQt6.QtWidgets import QFileDialog
+        from PyQt6.QtGui import QPdfWriter, QPageSize, QPageLayout
+        from PyQt6.QtCore import QMarginsF
+
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export AI Report to PDF",
+            "AI_Investigation_Report.pdf",
+            "PDF Documents (*.pdf)"
+        )
+        if not path:
+            return
+
+        try:
+            writer = QPdfWriter(path)
+            # Set resolution to screen DPI so pixel font sizes render correctly
+            writer.setResolution(96)
+            
+            # Set up page size and margins
+            writer.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
+            writer.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout.Unit.Millimeter)
+            
+            # Print document
+            self._response_area.document().print(writer)
+            QMessageBox.information(self, "Export Successful", f"Successfully saved PDF to:\n{path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Failed", f"Failed to save PDF:\n{e}")
+
     # ------------------------------------------------------------------
     # Async execution
     # ------------------------------------------------------------------
@@ -399,14 +442,6 @@ class AIAssistantPage(QWidget):
     def _append_ai_response(self, text: str) -> None:
         """Display an AI response."""
         display = str(text)
-
-        if "answer=" in display and "AIResponse" in display:
-            try:
-                start = display.index("answer='") + len("answer='")
-                end = display.index("'", start)
-                display = display[start:end]
-            except (ValueError, IndexError):
-                pass
 
         html_text = display.replace("\n", "<br>")
         html_text = html_text.replace("  •", "&nbsp;&nbsp;•")

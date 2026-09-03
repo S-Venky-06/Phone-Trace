@@ -18,36 +18,52 @@ class PhoneTraceSplashScreen(QSplashScreen):
     """Branded splash screen for application initialization."""
 
     def __init__(self) -> None:
-        frame = QFrame()
-        frame.setFixedSize(480, 260)
-        frame.setStyleSheet(f"""
-            QFrame {{
-                background-color: {BG_PRIMARY};
-                border: 1px solid {BORDER};
-                border-radius: 12px;
-            }}
-        """)
+        from PyQt6.QtGui import QPixmap
+        pm = QPixmap(480, 260)
+        pm.fill(Qt.GlobalColor.transparent)
+        super().__init__(pm, Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.FramelessWindowHint)
+        
+        self.setFixedSize(480, 260)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        layout = QVBoxLayout(frame)
-        layout.setContentsMargins(36, 32, 36, 32)
-        layout.setSpacing(10)
+        # Central layout
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(36, 32, 36, 32)
+        self.layout.setSpacing(10)
 
         title = QLabel("PhoneTrace")
         title.setStyleSheet(f"font-size: 32px; font-weight: 800; color: {ACCENT}; letter-spacing: -1px; background: transparent;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self.layout.addWidget(title)
 
         sub = QLabel("Digital Forensic Investigation Workstation")
         sub.setStyleSheet(f"font-size: 13px; color: {TEXT}; font-weight: 500; background: transparent;")
         sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(sub)
+        self.layout.addWidget(sub)
 
-        layout.addStretch()
+        self.layout.addStretch()
 
         self._status = QLabel("Initializing forensic engine...")
         self._status.setStyleSheet(f"font-size: 11px; color: {TEXT_DIM}; background: transparent;")
         self._status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self._status)
+        self.layout.addWidget(self._status)
 
-        pixmap = frame.grab()
-        super().__init__(pixmap, Qt.WindowType.WindowStaysOnTopHint)
+    def drawContents(self, painter):
+        """Draw a custom dark rounded background."""
+        from PyQt6.QtGui import QPainter, QPainterPath, QColor
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        path = QPainterPath()
+        path.addRoundedRect(0, 0, self.width(), self.height(), 12, 12)
+        
+        painter.fillPath(path, QColor(BG_PRIMARY))
+        
+        # Draw border
+        painter.setPen(QColor(BORDER))
+        painter.drawPath(path)
+        
+    def show_message(self, msg: str):
+        """Update the loading status message."""
+        self._status.setText(msg)
+        import sys
+        from PyQt6.QtWidgets import QApplication
+        QApplication.processEvents()

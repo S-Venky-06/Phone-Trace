@@ -7,12 +7,13 @@ smooth width animation, section dividers, and persistent state.
 """
 
 from PyQt6.QtCore import (
-    QEasingCurve, QPropertyAnimation, Qt, pyqtSignal, QSize,
+    QEasingCurve, QPropertyAnimation, Qt, pyqtSignal, QSize, QVariantAnimation
 )
 from PyQt6.QtWidgets import (
     QFrame, QLabel, QPushButton, QVBoxLayout, QWidget, QHBoxLayout,
     QSizePolicy,
 )
+from PyQt6.QtGui import QColor
 
 from gui.theme import (
     ACCENT, AI_ACCENT, BG_ELEVATED, BG_SIDEBAR, BORDER, TEXT, TEXT_DIM,
@@ -53,8 +54,48 @@ class _NavButton(QPushButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self._collapsed = False
+        
+        self._hover_anim = QVariantAnimation(self)
+        self._hover_anim.setDuration(150)
+        self._hover_anim.valueChanged.connect(self._update_stylesheet_bg)
+        
         self._update_text()
         self._apply_style(False)
+
+    def _update_stylesheet_bg(self, color: QColor) -> None:
+        """Update the background color smoothly."""
+        accent = AI_ACCENT if self._is_ai else ACCENT
+        rgba = f"rgba({color.red()}, {color.green()}, {color.blue()}, {color.alpha() / 255.0})"
+        self.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {rgba};
+                color: {TEXT_DIM};
+                border: none;
+                border-left: 3px solid transparent;
+                border-radius: 0px;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+                text-align: left;
+                padding-left: 12px;
+                font-size: 13px;
+            }}
+        """)
+
+    def enterEvent(self, event) -> None:
+        if not self.isChecked():
+            self._hover_anim.stop()
+            self._hover_anim.setStartValue(QColor(0,0,0,0))
+            self._hover_anim.setEndValue(QColor(BG_ELEVATED))
+            self._hover_anim.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event) -> None:
+        if not self.isChecked():
+            self._hover_anim.stop()
+            self._hover_anim.setStartValue(QColor(BG_ELEVATED))
+            self._hover_anim.setEndValue(QColor(0,0,0,0))
+            self._hover_anim.start()
+        super().leaveEvent(event)
 
     def _update_text(self) -> None:
         if self._collapsed:
@@ -85,25 +126,7 @@ class _NavButton(QPushButton):
                 }}
             """)
         else:
-            self.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: transparent;
-                    color: {TEXT_DIM};
-                    border: none;
-                    border-left: 3px solid transparent;
-                    border-radius: 0px;
-                    border-top-right-radius: 8px;
-                    border-bottom-right-radius: 8px;
-                    text-align: left;
-                    padding-left: 12px;
-                    font-size: 13px;
-                }}
-                QPushButton:hover {{
-                    background-color: {BG_ELEVATED};
-                    color: {TEXT};
-                    border-left: 3px solid {BORDER};
-                }}
-            """)
+            self._update_stylesheet_bg(QColor(0,0,0,0))
 
     def set_active(self, active: bool) -> None:
         self.setChecked(active)

@@ -9,6 +9,7 @@ navigation sidebar, page stack, details panel, and status bar.
 from __future__ import annotations
 
 import logging
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -16,7 +17,8 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
 from PyQt6.QtGui import QAction, QKeySequence, QMouseEvent
 from PyQt6.QtWidgets import (
     QDialog, QHBoxLayout, QMainWindow, QMessageBox, QSplitter,
-    QStackedWidget, QStatusBar, QToolBar, QWidget, QLabel, QPushButton, QVBoxLayout
+    QStackedWidget, QStatusBar, QToolBar, QWidget, QLabel, QPushButton, QVBoxLayout,
+    QSizeGrip
 )
 
 from gui.services.backend import BackendService
@@ -102,6 +104,11 @@ class CustomTitleBar(QWidget):
             self.parent_window.showNormal()
         else:
             self.parent_window.showMaximized()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        """Double click title bar to toggle maximize."""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._toggle_max()
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -346,6 +353,11 @@ class MainWindow(QMainWindow):
         sb = QStatusBar()
         self.setStatusBar(sb)
         sb.showMessage("Ready — Load evidence to begin investigation.")
+        
+        # Add resizing grip to the status bar (bottom right corner)
+        self.setCorner(Qt.Corner.BottomRightCorner, Qt.DockWidgetArea.BottomDockWidgetArea)
+        grip = QSizeGrip(sb)
+        sb.addPermanentWidget(grip)
 
     # ------------------------------------------------------------------
     # Signal wiring
