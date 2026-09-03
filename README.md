@@ -170,6 +170,19 @@ python -m unittest test_phase5 -v
 
 ---
 
+## Quick Start (Phase 6 — Premium UI & Mapping)
+
+Phase 6 introduces a fully modern, premium user experience and geospatial analysis:
+
+1. **Native Frameless Window**: Edge-to-edge dark theme with custom title bars, fully retaining standard Windows OS snapping and resizing capabilities via native Qt APIs.
+2. **Dynamic Boot Splash Screen**: A beautiful translucent splash screen hides the heavy loading operations (evidence parsing, AI model loading) during startup.
+3. **Smooth Animations**: Discarded abrupt CSS hover states in favor of buttery-smooth 150ms `QVariantAnimation` color transitions.
+4. **Modern Typography**: Bundled the **Roboto** font family for a clean, professional, enterprise-grade look.
+5. **Interactive GPS Playback**: Fully integrated Folium + Leaflet maps within a `QWebEngineView`, rendering 1,600+ GPS points. Features a "Play Path" timeline slider that draws the suspect's movements dynamically over time.
+6. **PDF Reporting**: Instantly export beautifully scaled, multi-page HTML AI Investigation Reports directly to A4 PDF documents.
+
+---
+
 ## Project Structure
 
 ```
@@ -253,7 +266,7 @@ The generated evidence represents 21 days of activity for suspect **Arjun Mehta*
 - **Chrome timestamps**: Microseconds since 1601-01-01 UTC (WebKit/Chrome format)
 - **Call/SMS timestamps**: Unix epoch milliseconds (Android format)
 - **GPS timestamps**: ISO 8601 with timezone
-- **No external dependencies**: Uses only Python standard library
+- **Dependencies**: The core data generators (Phase 1) run on standard library only. The UI and AI layers depend on `PyQt6`, `PyQt6-WebEngine`, `folium`, and optionally `google-genai`.
 
 ---
 
