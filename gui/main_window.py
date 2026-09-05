@@ -87,25 +87,25 @@ class CustomTitleBar(QWidget):
         
         layout.addStretch()
         
-        btn_min = QPushButton("_")
+        btn_min = QPushButton("➖")
         btn_min.setFixedSize(30, 30)
         btn_min.clicked.connect(self.parent_window.showMinimized)
         
-        btn_max = QPushButton("O")
+        btn_max = QPushButton("🔲")
         btn_max.setFixedSize(30, 30)
         btn_max.clicked.connect(self._toggle_max)
         
-        btn_close = QPushButton("X")
+        btn_close = QPushButton("❌")
         btn_close.setFixedSize(30, 30)
         btn_close.clicked.connect(self.parent_window.close)
         
         for btn in (btn_min, btn_max, btn_close):
-            btn.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 15px; font-weight: bold; font-family: Arial; }"
-                              "QPushButton:hover { background: #22272E; color: #E6EDF3; }")
+            btn.setStyleSheet("QPushButton { background: transparent; border: none; font-size: 14px; }"
+                              "QPushButton:hover { background: #22272E; }")
             layout.addWidget(btn)
             
-        btn_close.setStyleSheet("QPushButton { background: transparent; border: none; color: #7D8590; font-size: 15px; font-weight: bold; font-family: Arial; }"
-                                "QPushButton:hover { background: #E81123; color: white; }")
+        btn_close.setStyleSheet("QPushButton { background: transparent; border: none; font-size: 14px; }"
+                                "QPushButton:hover { background: #E81123; }")
         
         self.dragPos = QPoint()
 
